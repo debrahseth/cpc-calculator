@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import UnitConversion from "@/components/UnitConversion";
 import MoleFraction from "@/components/MoleFraction";
 import Stoichiometry from "@/components/Stoichiometry";
@@ -6,6 +7,7 @@ import MaterialBalance from "@/components/MaterialBalance";
 
 export default function CPCOne() {
   const [selectedCalc, setSelectedCalc] = useState("unit");
+  const router = useRouter();
 
   const renderCalculator = () => {
     switch (selectedCalc) {
@@ -44,6 +46,13 @@ export default function CPCOne() {
             <option value="stoich">📊 Stoichiometry</option>
             <option value="balance">🔄 Material Balance (No Reaction)</option>
           </select>
+
+          <button
+            onClick={() => router.push("/")}
+            className="mt-4 md:w-2xl px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+          >
+            🏠 Go to Home
+          </button>
         </div>
       </header>
 

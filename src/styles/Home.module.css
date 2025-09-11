@@ -106,27 +106,21 @@
 .typewriter {
   display: inline-block;
   overflow: hidden;
-  white-space: nowrap;
-  border-right: 3px solid #ffffff;
-  animation: typing 4s steps(50, end), blink 1.2s step-end infinite;
+  white-space: normal;
+  word-wrap: break-word;
   font-size: 1.3rem;
   font-weight: 400;
   color: #e0e0e0;
   margin-top: 0.5rem;
+  opacity: 0;
+  transform: scale(0.8);
+  animation: scaleFade 3.5s ease forwards;
 }
 
-@keyframes typing {
-  from {
-    width: 0;
-  }
+@keyframes scaleFade {
   to {
-    width: 100%;
-  }
-}
-
-@keyframes blink {
-  50% {
-    border-color: transparent;
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -140,5 +134,123 @@
   opacity: 0;
   transform: translateY(15px);
   animation: fadeUp 1s ease forwards;
-  animation-delay: 4.5s;
+  animation-delay: 1.5s;
+}
+
+/* -------------------- RESPONSIVE -------------------- */
+@media (max-width: 1024px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 2.5rem;
+  }
+
+  .cards {
+    gap: 1.5rem;
+  }
+
+  .card {
+    width: 240px;
+    padding: 1.5rem;
+  }
+
+  .typewriter {
+    font-size: 1.1rem;
+    max-width: 90%;
+    line-height: 1.4;
+  }
+
+  .subtitleExtra {
+    font-size: 1rem;
+    max-width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .heroImage {
+    max-width: 200px;
+  }
+
+  .cards {
+    gap: 1rem;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 80%;
+    max-width: 300px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .typewriter {
+    font-size: 1rem;
+    max-width: 95%;
+    line-height: 1.5;
+  }
+
+  .subtitleExtra {
+    font-size: 0.95rem;
+    max-width: 95%;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .heroImage {
+    max-width: 150px;
+  }
+
+  .cards {
+    gap: 0.75rem;
+  }
+
+  .card {
+    width: 90%;
+    padding: 1rem;
+  }
+
+  .cardImage {
+    width: 80px;
+  }
+
+  .card h2 {
+    font-size: 1.3rem;
+  }
+
+  .card p {
+    font-size: 0.9rem;
+  }
+
+  .typewriter {
+    font-size: 0.9rem;
+    max-width: 100%;
+    line-height: 1.4;
+    padding: 0 0.5rem;
+  }
+
+  .subtitleExtra {
+    font-size: 0.9rem;
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
 }

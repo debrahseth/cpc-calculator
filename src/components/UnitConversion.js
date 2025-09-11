@@ -6,17 +6,26 @@ const conversionFactors = {
     Celsius: {
       Kelvin: (c) => c + 273.15,
       Fahrenheit: (c) => (c * 9) / 5 + 32,
+      Rankine: (c) => ((c + 273.15) * 9) / 5,
       Celsius: (c) => c,
     },
     Kelvin: {
       Celsius: (k) => k - 273.15,
       Fahrenheit: (k) => ((k - 273.15) * 9) / 5 + 32,
+      Rankine: (k) => (k * 9) / 5,
       Kelvin: (k) => k,
     },
     Fahrenheit: {
       Celsius: (f) => ((f - 32) * 5) / 9,
       Kelvin: (f) => ((f - 32) * 5) / 9 + 273.15,
+      Rankine: (f) => f + 459.67,
       Fahrenheit: (f) => f,
+    },
+    Rankine: {
+      Celsius: (r) => ((r - 491.67) * 5) / 9,
+      Kelvin: (r) => (r * 5) / 9,
+      Fahrenheit: (r) => r - 459.67,
+      Rankine: (r) => r,
     },
   },
   pressure: {
@@ -291,7 +300,7 @@ export default function UnitConversion() {
   const [result, setResult] = useState(null);
 
   const units = {
-    temperature: ["Celsius", "Kelvin", "Fahrenheit"],
+    temperature: ["Celsius", "Kelvin", "Fahrenheit", "Rankine"],
     pressure: ["atm", "kPa", "bar", "mmHg", "psi"],
     mass: ["gram", "kilogram", "pound", "tonne"],
     length: ["meter", "centimeter", "millimeter", "foot", "inch"],
@@ -488,14 +497,14 @@ export default function UnitConversion() {
         <div className="flex gap-4">
           <button
             onClick={handleConvert}
-            className="flex-1 text-[20px] bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-md"
+            className="flex-1 md:text-[20px] bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-md"
           >
             🚀 Convert
           </button>
 
           <button
             onClick={handleReset}
-            className="flex-1 text-[20px] bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-400 transition shadow-md"
+            className="flex-1 md:text-[20px] bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-400 transition shadow-md"
           >
             ♻️ Reset
           </button>
