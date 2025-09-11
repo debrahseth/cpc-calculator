@@ -1,9 +1,11 @@
 import { useState } from "react";
 import molarMassDatabase from "../data/molarMasses";
+import { FaCalculator, FaUndo } from "react-icons/fa";
 
 export default function StoichiometryDropdown() {
   const [numReactants, setNumReactants] = useState(2);
-  const [numProducts, setNumProducts] = useState(1);
+  const [numProducts, setNumProducts] = useState(2);
+  const [conversionInput, setConversionInput] = useState("");
   const [reactants, setReactants] = useState(
     Array.from({ length: 2 }, () => ({
       compound: "",
@@ -13,10 +15,9 @@ export default function StoichiometryDropdown() {
     }))
   );
   const [products, setProducts] = useState(
-    Array.from({ length: 1 }, () => ({
+    Array.from({ length: 2 }, () => ({
       compound: "",
       coefficient: 1,
-      value: "",
       molarMass: "",
     }))
   );
@@ -26,7 +27,8 @@ export default function StoichiometryDropdown() {
   const [excessReactants, setExcessReactants] = useState([]);
   const [extentOfReaction, setExtentOfReaction] = useState(0);
   const [conversion, setConversion] = useState(0);
-  const [yields, setYields] = useState([]);
+  const [conversionReactant, setConversionReactant] = useState("");
+  const [summary, setSummary] = useState([]);
 
   const handleCompoundChange = (index, field, value, type) => {
     const arr = type === "reactant" ? [...reactants] : [...products];
@@ -55,7 +57,6 @@ export default function StoichiometryDropdown() {
         Array.from({ length: count }, () => ({
           compound: "",
           coefficient: 1,
-          value: "",
           molarMass: "",
         }))
       );
@@ -64,98 +65,166 @@ export default function StoichiometryDropdown() {
   };
 
   const handleCalculate = () => {
-    const allCompounds = [...reactants, ...products];
-    const known = allCompounds.find((c) => parseFloat(c.value) > 0);
-    if (!known) return alert("Enter mass or moles of at least one compound.");
-
-    const knownMoles =
-      inputType === "mole"
-        ? parseFloat(known.value)
-        : parseFloat(known.value) / known.molarMass;
-
-    // --- Determine Limiting Reactant ---
-    const ratios = reactants.map((r) => {
-      if (!r.compound) return Infinity;
-      const moles =
-        r.compound === known.compound
-          ? knownMoles
-          : inputType === "mole"
-          ? parseFloat(r.value || 0)
-          : parseFloat(r.value || 0) / r.molarMass || 0;
-      return moles / r.coefficient;
-    });
-
-    const positiveRatios = ratios.filter((r) => r > 0);
-    if (positiveRatios.length === 0) {
-      return alert(
-        "Cannot determine limiting reactant. Enter at least one reactant with amount."
+    // Validate inputs
+    if (
+      !reactants.every(
+        (r) => r.compound && r.coefficient > 0 && r.molarMass && r.value
+      )
+    ) {
+      alert(
+        "Please fill in all reactant fields (compound, coefficient, and amount)."
       );
+      return;
     }
-    const minRatio = Math.min(...positiveRatios);
-    const limiting = reactants[ratios.indexOf(minRatio)];
+    if (
+      !products.every((p) => p.compound && p.coefficient > 0 && p.molarMass)
+    ) {
+      alert("Please fill in all product fields (compound and coefficient).");
+      return;
+    }
 
-    setLimitingReactant(limiting.compound);
-    setExtentOfReaction(minRatio);
-
-    const computed = allCompounds.map((c) => {
-      const moles = minRatio * c.coefficient;
-      const mass = moles * c.molarMass;
-      return { ...c, moles, mass };
+    // Calculate initial moles for reactants
+    const reactantMoles = reactants.map((r) => {
+      const inputValue = parseFloat(r.value) || 0;
+      return inputType === "mole"
+        ? inputValue
+        : inputValue / (r.molarMass || 1);
     });
 
-    // --- Fractions ---
-    const totalMoles = computed.reduce((sum, c) => sum + c.moles, 0);
-    const totalMass = computed.reduce((sum, c) => sum + c.mass, 0);
-    const withFractions = computed.map((c) => ({
-      ...c,
-      moleFraction: totalMoles ? c.moles / totalMoles : 0,
-      massFraction: totalMass ? c.mass / totalMass : 0,
-    }));
+    if (!reactantMoles.some((m) => m > 0)) {
+      alert("Enter a valid amount for at least one reactant.");
+      return;
+    }
 
-    // --- Excess Reactants ---
-    const excess = reactants
-      .filter((r) => r.compound !== limiting.compound)
-      .map((r, idx) => {
-        const initialMoles =
-          inputType === "mole"
-            ? parseFloat(r.value || 0)
-            : parseFloat(r.value || 0) / r.molarMass || 0;
-        const remaining = initialMoles - minRatio * r.coefficient;
+    // Determine limiting reactant
+    const ratios = reactantMoles.map(
+      (m, idx) => m / (reactants[idx].coefficient || 1)
+    );
+    const minRatio = Math.min(...ratios.filter((r) => r > 0));
+    const limitingIndex = ratios.indexOf(minRatio);
+    const limiting = reactants[limitingIndex];
+    setLimitingReactant(limiting.compound);
+
+    // Determine which reactant controls the conversion
+    const conversionIndex =
+      conversionReactant === ""
+        ? limitingIndex
+        : reactants.findIndex((r) => r.compound === conversionReactant);
+
+    // Get user conversion fraction
+    const userConversion = parseFloat(conversionInput);
+    const conversionFactor =
+      isNaN(userConversion) || userConversion >= 100 ? 1 : userConversion / 100;
+    setConversion(conversionFactor);
+
+    // Compute extent of reaction based on conversion of selected reactant
+    const extent =
+      conversionFactor *
+      (reactantMoles[conversionIndex] / reactants[conversionIndex].coefficient);
+    setExtentOfReaction(extent);
+
+    // Calculate moles reacted and remaining for reactants
+    const computedReactants = reactants.map((r, idx) => {
+      const initialMoles = reactantMoles[idx];
+      const reactedMoles = extent * r.coefficient;
+      const remainingMoles = initialMoles - reactedMoles;
+      return {
+        ...r,
+        initialMoles,
+        reactedMoles,
+        remainingMoles,
+        reactedMass: reactedMoles * r.molarMass,
+        remainingMass: remainingMoles * r.molarMass,
+      };
+    });
+
+    // Calculate theoretical and actual moles/mass for products
+    const computedProducts = products.map((p) => {
+      const theoreticalMoles = extent * p.coefficient;
+      const actualMoles = theoreticalMoles; // conversion already applied via extent
+      return {
+        ...p,
+        theoreticalMoles,
+        actualMoles,
+        theoreticalMass: theoreticalMoles * p.molarMass,
+        actualMass: actualMoles * p.molarMass,
+        yield: theoreticalMoles > 0 ? 100 : 0,
+      };
+    });
+
+    // Calculate excess reactants
+    const excess = computedReactants
+      .filter((r, idx) => idx !== limitingIndex)
+      .map((r) => {
+        const excessMoles = r.remainingMoles;
+        const excessMass = excessMoles * r.molarMass;
+        const percentExcess =
+          r.reactedMoles > 0 ? (excessMoles / r.reactedMoles) * 100 : 0;
         return {
           compound: r.compound,
-          remaining: remaining > 0 ? remaining : 0,
+          remainingMoles: excessMoles,
+          remainingMass: excessMass,
+          percentExcess,
         };
       });
     setExcessReactants(excess);
 
-    // --- Conversion and yield ---
-    const conversionVal =
-      (minRatio * limiting.coefficient) /
-      (inputType === "mole"
-        ? parseFloat(limiting.value || 0)
-        : parseFloat(limiting.value || 0) / limiting.molarMass);
-    setConversion(conversionVal);
-
-    const yieldValues = products.map((p) => {
-      const productAmount = p.moles; // moles formed
-      const theoreticalMoles = minRatio * p.coefficient;
-      return {
+    // Prepare summary data
+    const summaryData = [
+      ...computedReactants.map((r) => ({
+        compound: r.compound,
+        initialMoles: r.initialMoles,
+        reactedMoles: r.reactedMoles,
+        remainingMoles: r.remainingMoles,
+        mass: r.reactedMass,
+        percentReacted:
+          r.initialMoles > 0 ? (r.reactedMoles / r.initialMoles) * 100 : 0,
+        percentExcess:
+          excess.find((e) => e.compound === r.compound)?.percentExcess || 0,
+      })),
+      ...computedProducts.map((p) => ({
         compound: p.compound,
-        yield: (productAmount / theoreticalMoles) * 100,
-      };
-    });
-    setYields(yieldValues);
+        initialMoles: 0,
+        reactedMoles: p.actualMoles,
+        remainingMoles: p.actualMoles,
+        mass: p.actualMass,
+        percentReacted: 100,
+        percentExcess: 0,
+        theoreticalMoles: p.theoreticalMoles,
+        theoreticalMass: p.theoreticalMass,
+      })),
+    ];
 
-    setResults(withFractions);
+    setSummary(summaryData);
+    setResults([...computedReactants, ...computedProducts]);
   };
 
   const handleReset = () => {
+    setNumReactants(2);
+    setNumProducts(2);
+    setReactants(
+      Array.from({ length: 2 }, () => ({
+        compound: "",
+        coefficient: 1,
+        value: "",
+        molarMass: "",
+      }))
+    );
+    setProducts(
+      Array.from({ length: 2 }, () => ({
+        compound: "",
+        coefficient: 1,
+        molarMass: "",
+      }))
+    );
+    setInputType("mole");
+    setConversionInput("");
     setResults(null);
     setLimitingReactant(null);
     setExcessReactants([]);
     setExtentOfReaction(0);
     setConversion(0);
-    setYields([]);
+    setSummary([]);
   };
 
   const renderEquation = () => {
@@ -170,169 +239,430 @@ export default function StoichiometryDropdown() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h2 className="text-3xl font-extrabold text-center text-indigo-900 mb-8">
+    <div className="w-full mx-auto p-8 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-3xl shadow-2xl border-2 border-indigo-200">
+      <h2 className="text-4xl md:text-5xl font-extrabold text-center text-indigo-900 mb-10 tracking-wide">
         ⚗️ Stoichiometry Calculator
       </h2>
 
-      {/* Reactants & Products Input */}
-      <div className="mb-6">
-        <label>Number of Reactants:</label>
-        <input
-          type="number"
-          value={numReactants}
-          onChange={(e) => handleNumChange("reactant", e.target.value)}
-          className="border rounded p-2 w-24"
-        />
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Reactants */}
+        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 rounded-2xl shadow-lg border-2 border-indigo-300 animate-fadeIn">
+          <h4 className="text-indigo-800 font-bold text-2xl md:text-3xl mb-4 text-center">
+            Reactants
+          </h4>
+
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:gap-4">
+            <label className="font-medium text-lg sm:text-xl text-indigo-700">
+              Number of Reactants:
+            </label>
+            <input
+              type="number"
+              value={numReactants}
+              onChange={(e) => handleNumChange("reactant", e.target.value)}
+              className="border rounded-lg p-2 w-full sm:w-32 mt-2 sm:mt-0"
+            />
+          </div>
+
+          {reactants.map((r, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3 bg-white p-3 rounded-xl shadow-md border-l-4 border-indigo-500"
+            >
+              <div className="flex flex-col">
+                <label className="text-indigo-700 font-medium text-sm mb-1">
+                  Compound
+                </label>
+                <select
+                  value={r.compound}
+                  onChange={(e) =>
+                    handleCompoundChange(
+                      i,
+                      "compound",
+                      e.target.value,
+                      "reactant"
+                    )
+                  }
+                  className="border rounded p-2 w-full"
+                >
+                  <option value="">Select</option>
+                  {Object.keys(molarMassDatabase).map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-indigo-700 font-medium text-sm mb-1">
+                  Stoichiometric Coeff
+                </label>
+                <input
+                  type="number"
+                  value={r.coefficient}
+                  onChange={(e) =>
+                    handleCompoundChange(
+                      i,
+                      "coefficient",
+                      e.target.value,
+                      "reactant"
+                    )
+                  }
+                  placeholder="Coeff"
+                  className="border rounded p-2 w-full"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-indigo-700 font-medium text-sm mb-1">
+                  {inputType === "mole" ? "Moles" : "Mass"}
+                </label>
+                <input
+                  type="number"
+                  value={r.value}
+                  onChange={(e) =>
+                    handleCompoundChange(i, "value", e.target.value, "reactant")
+                  }
+                  placeholder={inputType === "mole" ? "Moles" : "Mass"}
+                  className="border rounded p-2 w-full"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-indigo-700 font-medium text-sm mb-1">
+                  Molar Mass
+                </label>
+                <input
+                  type="number"
+                  value={r.molarMass}
+                  readOnly
+                  className="border rounded p-2 w-full bg-gray-100"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Products */}
+        <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-2xl shadow-lg border-2 border-pink-300 animate-fadeIn">
+          <h4 className="text-pink-800 font-bold text-2xl md:text-3xl mb-4 text-center">
+            Products
+          </h4>
+
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:gap-4">
+            <label className="font-medium text-lg sm:text-xl text-pink-700">
+              Number of Products:
+            </label>
+            <input
+              type="number"
+              value={numProducts}
+              onChange={(e) => handleNumChange("product", e.target.value)}
+              className="border rounded-lg p-2 w-full sm:w-32 mt-2 sm:mt-0"
+            />
+          </div>
+
+          {products.map((p, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3 bg-white p-3 rounded-xl shadow-md border-l-4 border-pink-500"
+            >
+              <div className="flex flex-col">
+                <label className="text-pink-700 font-medium text-sm mb-1">
+                  Compound
+                </label>
+                <select
+                  value={p.compound}
+                  onChange={(e) =>
+                    handleCompoundChange(
+                      i,
+                      "compound",
+                      e.target.value,
+                      "product"
+                    )
+                  }
+                  className="border rounded p-2 w-full"
+                >
+                  <option value="">Select</option>
+                  {Object.keys(molarMassDatabase).map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-pink-700 font-medium text-sm mb-1">
+                  Stoichiometric Coefficient
+                </label>
+                <input
+                  type="number"
+                  value={p.coefficient}
+                  min="1"
+                  onChange={(e) =>
+                    handleCompoundChange(
+                      i,
+                      "coefficient",
+                      e.target.value,
+                      "product"
+                    )
+                  }
+                  placeholder="Coeff"
+                  className="border rounded p-2 w-full"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-pink-700 font-medium text-sm mb-1">
+                  Molar Mass
+                </label>
+                <input
+                  type="number"
+                  value={p.molarMass}
+                  readOnly
+                  className="border rounded p-2 w-full bg-gray-100"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-      {reactants.map((r, i) => (
-        <div key={i} className="grid grid-cols-4 gap-2 mb-2">
+
+      <div className="w-full mb-6 bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-2xl shadow-lg border-2 border-green-300 w-64 mx-auto animate-fadeIn">
+        <label className="block text-green-800 font-bold mb-2 text-[35px] text-center">
+          Basis & Conversion
+        </label>
+        <div className="mb-5 flex flex-col">
+          <label className="text-green-700 font-medium mb-1">Basis</label>
           <select
-            value={r.compound}
-            onChange={(e) =>
-              handleCompoundChange(i, "compound", e.target.value, "reactant")
-            }
-            className="border rounded p-2"
+            value={inputType}
+            onChange={(e) => setInputType(e.target.value)}
+            className="w-full text-[20px] p-2 rounded-lg border border-green-400 focus:outline-none focus:ring-2 focus:ring-green-300 shadow-sm transition-all duration-300"
           >
-            <option value="">Select</option>
-            {Object.keys(molarMassDatabase).map((c) => (
-              <option key={c} value={c}>
-                {c}
+            <option value="mole">Moles</option>
+            <option value="mass">Mass</option>
+          </select>
+        </div>
+        <div className="mt-5 flex flex-col">
+          <label className="text-green-700 font-medium mb-1">
+            Conversion (%)
+          </label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            value={conversionInput || ""}
+            onChange={(e) => setConversionInput(e.target.value)}
+            placeholder="Default 100%"
+            className="w-full p-2 rounded-lg border border-green-400 focus:outline-none focus:ring-2 focus:ring-green-300 shadow-sm transition-all duration-300"
+          />
+          <p className="text-green-600 text-sm mt-1">
+            Enter desired conversion, leave blank for 100%.
+          </p>
+        </div>
+        <div className="mt-5 flex flex-col">
+          <label className="text-green-700 font-medium mb-1">
+            Conversion affects reactant:
+          </label>
+          <select
+            value={conversionReactant}
+            onChange={(e) => setConversionReactant(e.target.value)}
+            className="w-full text-[20px] p-2 rounded-lg border border-green-400 focus:outline-none focus:ring-2 focus:ring-green-300 shadow-sm transition-all duration-300"
+          >
+            <option value="">All reactants (default)</option>
+            {reactants.map((r, idx) => (
+              <option key={idx} value={r.compound}>
+                {r.compound}
               </option>
             ))}
           </select>
-          <input
-            type="number"
-            value={r.coefficient}
-            onChange={(e) =>
-              handleCompoundChange(i, "coefficient", e.target.value, "reactant")
-            }
-            placeholder="Coeff"
-            className="border rounded p-2"
-          />
-          <input
-            type="number"
-            value={r.value}
-            onChange={(e) =>
-              handleCompoundChange(i, "value", e.target.value, "reactant")
-            }
-            placeholder={inputType === "mole" ? "Moles" : "Mass"}
-            className="border rounded p-2"
-          />
-          <input
-            type="number"
-            value={r.molarMass}
-            readOnly
-            className="border rounded p-2 bg-gray-100"
-          />
         </div>
-      ))}
-      <div className="mb-6">
-        <label>Number of Products:</label>
-        <input
-          type="number"
-          value={numProducts}
-          onChange={(e) => handleNumChange("product", e.target.value)}
-          className="border rounded p-2 w-24"
-        />
-      </div>
-      {products.map((p, i) => (
-        <div key={i} className="grid grid-cols-4 gap-2 mb-2">
-          <select
-            value={p.compound}
-            onChange={(e) =>
-              handleCompoundChange(i, "compound", e.target.value, "product")
-            }
-            className="border rounded p-2"
-          >
-            <option value="">Select</option>
-            {Object.keys(molarMassDatabase).map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-          <input
-            type="number"
-            value={p.coefficient}
-            min="1"
-            onChange={(e) =>
-              handleCompoundChange(i, "coefficient", e.target.value, "product")
-            }
-            placeholder="Coeff"
-            className="border rounded p-2"
-          />
-          <input
-            type="number"
-            value={p.value}
-            min="1"
-            onChange={(e) =>
-              handleCompoundChange(i, "value", e.target.value, "product")
-            }
-            placeholder={inputType === "mole" ? "Moles" : "Mass"}
-            className="border rounded p-2"
-          />
-          <input
-            type="number"
-            value={p.molarMass}
-            readOnly
-            className="border rounded p-2 bg-gray-100"
-          />
-        </div>
-      ))}
-
-      {/* Basis */}
-      <div className="mb-4">
-        <label>Basis:</label>
-        <select
-          value={inputType}
-          onChange={(e) => setInputType(e.target.value)}
-          className="border rounded p-2"
-        >
-          <option value="mole">Moles</option>
-          <option value="mass">Mass</option>
-        </select>
       </div>
 
-      {/* Buttons */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6 w-full max-w-lg mx-auto">
         <button
           onClick={handleCalculate}
-          className="flex-1 p-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700"
+          className="flex-1 sm:flex-[0_0_50%] p-3 bg-green-600 text-white rounded-xl font-semibold shadow-lg hover:bg-green-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 flex items-center justify-center gap-2"
         >
+          <FaCalculator className="w-5 h-5" />
           Calculate
         </button>
         <button
           onClick={handleReset}
-          className="flex-1 p-3 bg-gray-300 rounded-xl font-semibold hover:bg-gray-400"
+          className="flex-1 sm:flex-[0_0_50%] p-3 bg-gray-300 rounded-xl font-semibold shadow-lg hover:bg-gray-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 flex items-center justify-center gap-2"
         >
+          <FaUndo className="w-5 h-5" />
           Reset
         </button>
       </div>
 
-      {/* Results */}
       {results && (
-        <div className="mb-6 p-4 bg-indigo-50 rounded-xl shadow text-center">
-          <h3 className="font-bold text-indigo-700 text-xl mb-2">
-            Reaction: {renderEquation()}
+        <div className="mb-6 p-6 bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 rounded-2xl shadow-xl border-2 border-indigo-300 transform transition-all duration-500 hover:scale-102 animate-fadeIn">
+          <h3 className="font-extrabold text-indigo-800 text-2xl mb-4 tracking-wide">
+            ⚛️ Reaction:{" "}
+            <span className="text-purple-700">{renderEquation()}</span>
           </h3>
-          <p>Limiting Reactant: {limitingReactant}</p>
-          {excessReactants.length > 0 && (
-            <p>
-              Excess Reactants:{" "}
-              {excessReactants.map((e) => e.compound).join(", ")}
-            </p>
-          )}
-          <p>Extent of Reaction: {extentOfReaction.toFixed(3)} mol</p>
-          <p>Conversion: {(conversion * 100).toFixed(2)}%</p>
-          <p>Yields:</p>
-          <ul className="list-disc ml-6">
-            {yields.map((y) => (
-              <li key={y.compound}>
-                {y.compound}: {y.yield.toFixed(2)}%
-              </li>
-            ))}
-          </ul>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+            <div className="bg-white p-4 rounded-xl shadow-md border-l-4 border-indigo-500">
+              <p className="font-semibold text-indigo-700 mb-2">
+                Limiting Reactant:
+              </p>
+              <p className="text-indigo-900 font-medium">{limitingReactant}</p>
+            </div>
+
+            {excessReactants.length > 0 && (
+              <div className="bg-white p-4 rounded-xl shadow-md border-l-4 border-green-400">
+                <p className="font-semibold text-green-700 mb-2">
+                  Excess Reactants:
+                </p>
+                <p className="text-green-900 font-medium">
+                  {excessReactants.map((e) => e.compound).join(", ")}
+                </p>
+              </div>
+            )}
+
+            <div className="bg-white p-4 rounded-xl shadow-md border-l-4 border-purple-400">
+              <p className="font-semibold text-purple-700 mb-2">
+                Extent of Reaction:
+              </p>
+              <p className="text-purple-900 font-medium">
+                {extentOfReaction.toFixed(3)} mol
+              </p>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl shadow-md border-l-4 border-pink-400">
+              <p className="font-semibold text-pink-700 mb-2">Conversion:</p>
+              <p className="text-pink-900 font-medium">
+                {(conversion * 100).toFixed(2)}%
+              </p>
+            </div>
+
+            <div className="col-span-1 md:col-span-2 bg-white p-6 rounded-xl shadow-md border-l-4 border-yellow-400">
+              <p className="font-semibold text-yellow-700 mb-4 text-lg">
+                ⚡ Product Yields
+              </p>
+              <ul className="space-y-4">
+                {results
+                  .filter((r) =>
+                    products.some((p) => p.compound === r.compound)
+                  )
+                  .map((p) => (
+                    <li
+                      key={p.compound}
+                      className="bg-yellow-50 p-3 rounded-lg shadow-sm border border-yellow-200"
+                    >
+                      <p className="font-bold text-yellow-800 text-md mb-2">
+                        {p.compound}
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-yellow-900 text-sm">
+                        <div className="bg-yellow-100 p-2 rounded">
+                          <p className="font-medium">Theoretical</p>
+                          <p>
+                            {p.theoreticalMoles.toFixed(3)} mol /{" "}
+                            {p.theoreticalMass.toFixed(3)} g
+                          </p>
+                        </div>
+                        <div className="bg-yellow-200 p-2 rounded">
+                          <p className="font-medium">Actual</p>
+                          <p>
+                            {p.actualMoles.toFixed(3)} mol /{" "}
+                            {p.actualMass.toFixed(3)} g
+                          </p>
+                        </div>
+                        <div className="bg-yellow-300 p-2 rounded flex items-center justify-center font-semibold text-yellow-800">
+                          Yield: {p.yield.toFixed(2)}%
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+
+            {excessReactants.length > 0 && (
+              <div className="col-span-1 md:col-span-2 bg-white p-4 rounded-xl shadow-md border-l-4 border-green-400">
+                <p className="font-semibold text-green-700 mb-2">
+                  Excess Reactants (Amount remaining):
+                </p>
+                <ul className="list-disc list-inside text-green-900 font-medium space-y-1">
+                  {excessReactants.map((e) => (
+                    <li key={e.compound}>
+                      <span className="font-semibold">{e.compound}:</span>{" "}
+                      {`${e.remainingMoles.toFixed(
+                        3
+                      )} mol (${e.remainingMass.toFixed(
+                        3
+                      )} g), ${e.percentExcess.toFixed(2)}% excess`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {summary.length > 0 && (
+              <div className="mt-6 w-full overflow-x-auto">
+                <h3 className="font-extrabold text-indigo-800 text-2xl mb-4 tracking-wide">
+                  📊 Summary Table
+                </h3>
+                <div className="inline-block min-w-full align-middle">
+                  <table className="min-w-full bg-white rounded-xl shadow-md border border-gray-300">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-3 py-2 sm:px-4 sm:py-3 border text-left text-sm sm:text-base">
+                          Compound
+                        </th>
+                        <th className="px-3 py-2 sm:px-4 sm:py-3 border text-left text-sm sm:text-base">
+                          Initial Moles Fed (mol)
+                        </th>
+                        <th className="px-3 py-2 sm:px-4 sm:py-3 border text-left text-sm sm:text-base">
+                          Reacted Moles (mol)
+                        </th>
+                        <th className="px-3 py-2 sm:px-4 sm:py-3 border text-left text-sm sm:text-base">
+                          Remaining Moles Out (mol)
+                        </th>
+                        <th className="px-3 py-2 sm:px-4 sm:py-3 border text-left text-sm sm:text-base">
+                          Mass (g)
+                        </th>
+                        <th className="px-3 py-2 sm:px-4 sm:py-3 border text-left text-sm sm:text-base">
+                          % Reacted
+                        </th>
+                        <th className="px-3 py-2 sm:px-4 sm:py-3 border text-left text-sm sm:text-base">
+                          % Excess
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {summary.map((s) => (
+                        <tr key={s.compound} className="hover:bg-gray-50">
+                          <td className="px-3 py-2 sm:px-4 sm:py-2 border font-semibold text-sm sm:text-base">
+                            {s.compound}
+                          </td>
+                          <td className="px-3 py-2 sm:px-4 sm:py-2 border text-sm sm:text-base">
+                            {s.initialMoles.toFixed(3)}
+                          </td>
+                          <td className="px-3 py-2 sm:px-4 sm:py-2 border text-sm sm:text-base">
+                            {s.reactedMoles.toFixed(3)}
+                          </td>
+                          <td className="px-3 py-2 sm:px-4 sm:py-2 border text-sm sm:text-base">
+                            {s.remainingMoles.toFixed(3)}
+                          </td>
+                          <td className="px-3 py-2 sm:px-4 sm:py-2 border text-sm sm:text-base">
+                            {s.mass.toFixed(3)}
+                          </td>
+                          <td className="px-3 py-2 sm:px-4 sm:py-2 border text-sm sm:text-base">
+                            {s.percentReacted.toFixed(2)}%
+                          </td>
+                          <td className="px-3 py-2 sm:px-4 sm:py-2 border text-sm sm:text-base">
+                            {s.percentExcess.toFixed(2)}%
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

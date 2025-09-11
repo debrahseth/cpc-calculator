@@ -1,7 +1,10 @@
 import Link from "next/link";
 import styles from "@/styles/Home.module.css";
+import { useState } from "react";
 
 export default function Home() {
+  const [showMessage, setShowMessage] = useState(false);
+
   return (
     <div className={styles.container}>
       <header className={styles.hero}>
@@ -25,6 +28,7 @@ export default function Home() {
       </header>
 
       <section className={styles.cards}>
+        {/* CPC One - Active */}
         <Link href="/cpc-one" className={styles.card}>
           <img
             src="../.././cpc1.png"
@@ -35,7 +39,12 @@ export default function Home() {
           <p>Start with the basics and solve your first process problems.</p>
         </Link>
 
-        <Link href="/cpc-two" className={styles.card}>
+        {/* CPC Two - Disabled / Under Construction */}
+        <div
+          className={`${styles.card} cursor-not-allowed opacity-60`}
+          onClick={() => setShowMessage(true)}
+          title="This part is still under construction"
+        >
           <img
             src="../.././cpc2.png"
             alt="CPC Two"
@@ -43,7 +52,19 @@ export default function Home() {
           />
           <h2>CPC Two</h2>
           <p>Dive deeper into advanced calculations and problem-solving.</p>
-        </Link>
+        </div>
+
+        {showMessage && (
+          <div className="fixed top-4 right-4 bg-yellow-100 text-yellow-800 border border-yellow-300 px-4 py-2 rounded shadow-lg">
+            CPC Two is still under construction! 🚧
+            <button
+              className="ml-4 text-sm font-bold"
+              onClick={() => setShowMessage(false)}
+            >
+              Close
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );
