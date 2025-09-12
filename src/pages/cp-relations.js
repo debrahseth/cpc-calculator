@@ -64,7 +64,7 @@ export default function CpRelationsPage() {
             <>
               Estimated heat capacities{" "}
               <span className="font-semibold text-indigo-600">
-                using Kopp's Rule
+                using Kopp&apos;s Rule
               </span>{" "}
               for individual elements. 🧪
             </>
@@ -90,7 +90,7 @@ export default function CpRelationsPage() {
                 : "bg-gray-200 text-gray-800 hover:bg-gray-300"
             }`}
           >
-            Kopp's Rule
+            Kopp&apos;s Rule
           </button>
         </div>
 
