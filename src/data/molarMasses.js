@@ -1,61 +1,155 @@
 const molarMassDatabase = {
-  H2O: 18.015, // Water
-  CO2: 44.01, // Carbon dioxide
-  O2: 32.0, // Oxygen
-  N2: 28.02, // Nitrogen
-  NH3: 17.03, // Ammonia
-  H2: 2.016, // Hydrogen
-  HCl: 36.46, // Hydrogen chloride
-  NaCl: 58.44, // Sodium chloride
-  KCl: 74.55, // Potassium chloride
-  NaOH: 40.0, // Sodium hydroxide
-  KOH: 56.11, // Potassium hydroxide
-  CaCO3: 100.09, // Calcium carbonate
-  CaO: 56.08, // Calcium oxide
-  "Ca(OH)2": 74.09, // Calcium hydroxide
-  H2SO4: 98.08, // Sulfuric acid
-  HNO3: 63.01, // Nitric acid
-  H3PO4: 97.99, // Phosphoric acid
-  Na2CO3: 105.99, // Sodium carbonate
-  NaHCO3: 84.01, // Sodium bicarbonate
-  Cl2: 70.9, // Chlorine
-  SO2: 64.07, // Sulfur dioxide
-  SO3: 80.06, // Sulfur trioxide
+  "H2O - Water": 18.015,
+  "CO2 - Carbon dioxide": 44.01,
+  "O2 - Oxygen": 32.0,
+  "He - Helium": 4.0,
+  "C - Carbon (graphite)": 12.01,
+  "CS2 - Carbon disulfide": 76.14,
+  "CCl4 - Carbon tetrachloride": 153.84,
+  "N2 - Nitrogen": 28.02,
+  "NH3 - Ammonia": 17.03,
+  "NH4OH - Ammonium hydroxide": 35.03,
+  "NH4NO3 - Ammonium nitrate": 80.05,
+  "(NH4)2SO4 - Ammonium sulfate": 132.14,
+  "C6H7N - Aniline": 93.12,
+  "H2 - Hydrogen": 2.016,
+  "HBr - Hydrogen bromide": 80.92,
+  "HCN - Hydrogen cyanide": 27.03,
+  "HF - Hydrogen fluoride": 20.0,
+  "H2S - Hydrogen sulfide": 34.08,
+  "HCl - Hydrogen chloride": 36.46,
+  "NaCl - Sodium chloride": 58.44,
+  "CaCl - Calcium chloride": 110.99,
+  "KCl - Potassium chloride": 74.55,
+  "NaOH - Sodium hydroxide": 40.0,
+  "KOH - Potassium hydroxide": 56.11,
+  "CaCO3 - Calcium carbonate": 100.09,
+  "CaO - Calcium oxide": 56.08,
+  "CaC2 - Calcium carbide": 64.1,
+  "Ca(OH)2 - Calcium hydroxide": 74.09,
+  "Ca3(PO4)2 - Calcium phosphate": 310.19,
+  "CaSiO3 - Calcium silicate": 116.17,
+  "CaSO4 - Calcium sulfate": 136.15,
+  "Na2SO4 - Sodium sulfate": 142.05,
+  "Na2S - Sodium sulfide": 78.05,
+  "Na2SO3 - Sodium sulfite": 126.05,
+  "Na2S2O3 - Sodium thiosulfate": 158.11,
+  "H2SO4 - Sulfuric acid": 98.08,
+  "HNO3 - Nitric acid": 63.01,
+  "H3PO4 - Phosphoric acid": 97.99,
+  "Na2CO3 - Sodium carbonate": 105.99,
+  "NaHCO3 - Sodium bicarbonate": 84.01,
+  "NaHSO4 - Sodium bisulfate": 120.07,
+  "NaCN _ Sodium cyanide": 49.01,
+  "NaNO3 - Sodium nitrate": 85.0,
+  "NaNO2 - Sodium nitrite": 69.0,
+  "Cl2 - Chlorine": 70.91,
+  "SO2 - Sulfur dioxide": 64.07,
+  "SO3 - Sulfur trioxide": 80.06,
+  "C3H6O - Acetone": 58.08,
+  "Br2 - Bromine": 159.83,
+  "I2 - Iodine": 253.8,
+  "Fe - Iron": 55.85,
+  "Pb - Lead": 207.21,
+  "PbO - Lead oxide": 223.21,
+  "Mg - Magnesium": 24.32,
+  "MgCl2 - Magnesium chloride": 95.23,
+  "Mg(OH)2 - Magnesium hydroxide": 58.34,
+  "MgO - Magnesium oxide": 40.32,
+  "Hg - Mercury": 200.61,
+  "Ni - Nickel": 58.69,
+  "HNO3 - Nitric acid": 63.02,
+  "C6H5O2N - Nitrobenzene": 123.11,
+  "H3PO4 - Phosphoric acid": 98.0,
+  "P4 - Phosphorus (red)": 123.9,
+  "P4 - Phosphorus (white)": 123.9,
+  "P2O5 - Phosphorus pentoxide": 141.95,
+  "S8 - Sulfur (rhombic/monoclinic)": 256.53,
+  "Zn - Zinc": 65.38,
 
   // Hydrocarbons
-  CH4: 16.04, // Methane
-  C2H6: 30.07, // Ethane
-  C3H8: 44.1, // Propane
-  C4H10: 58.12, // Butane
-  C6H6: 78.11, // Benzene
-  C8H18: 114.23, // Octane
+  "CH4 - Methane": 16.04,
+  "C3H6O2 - Methyl acetate": 74.08,
+  "CH5N - Methyl amine": 31.06,
+  "CH3Cl - Methyl chloride": 50.49,
+  "C4H8O - Methyl ethyl ketone": 72.1,
+  "C2H6 - Ethane": 30.07,
+  "C2H4 - Ethylene": 28.05,
+  "C2H6O2 - Ethylene glycol": 62.07,
+  "C4H8O2 - Ethyl acetate": 88.1,
+  "C2H2 - Acetylene": 26.04,
+  "C3H8 - Propane": 44.1,
+  "C3H6 - Propylene": 42.08,
+  "C4H10 - n-Butane": 58.12,
+  "C5H12 - n-Pentane": 72.15,
+  "C5H10 - Pentene": 70.13,
+  "C4H8 - Butene": 56.1,
+  "C4H10 - Isobutane": 58.12,
+  "C4H6 - 1,2-Butadiene": 54.09,
+  "C4H6 - 1,3-Butadiene": 54.09,
+  "C6H14 - Hexane": 86.17,
+  "C6H6 - Benzene": 78.11,
+  "C6H10 - Ethyl benzene": 106.16,
+  "C7H16 - Heptane": 100.2,
+  "C2H5Br - Ethyl bromide": 108.98,
+  "C8H18 - 3-Ethyl hexane": 114.22,
+  "C9H20 - Nonane": 128.25,
+  "C6H12 - Cyclohexane": 84.16,
+  "C5H10 - Cyclopentane": 70.13,
+  "C8H18 - Octane": 114.23,
+  "C10H22 - Decane": 142.28,
+  "C10H8 - Naphthalene": 128.16,
+  "C6H5Cl - Chlorobenzene": 112.56,
+  "C2H5Cl - Chloroethane (Ethyl chloride)": 64.52,
+  "CHCl3 - Chloroform": 119.39,
+  "C7H8 - Toluene": 92.13,
+  "C8H10 - p-xylene": 106.16,
+  "C8H10 - o-xylene": 106.16,
+  "C8H10 - m-xylene": 106.16,
 
   // Alcohols
-  CH3OH: 32.04, // Methanol
-  C2H5OH: 46.07, // Ethanol
-  C3H7OH: 60.1, // Propanol
-  C4H9OH: 74.12, // Butanol
+  "CH3OH - Methanol": 32.04,
+  "C2H5OH - Ethanol": 46.07,
+  "C3H7OH - Propanol (Propyl alcohol)": 60.09,
+  "C3H7OH - Isopropyl alcohol": 60.09,
+  "C4H9OH - Butanol": 74.12,
+  "C7H8O - Benzene alcohol": 108.13,
+  "(C2H5)2O - Diethyl ether": 74.12,
+  "C6H5OH - Phenol": 94.11,
 
   // Organic acids
-  CH3COOH: 60.05, // Acetic acid
-  HCOOH: 46.03, // Formic acid
-  C6H5COOH: 122.12, // Benzoic acid
-  C6H12O6: 180.16, // Glucose
+  "CH3COOH - Acetic acid": 60.05,
+  "HCOOH - Formic acid": 46.03,
+  "C6H5COOH - Benzoic acid": 122.12,
+  "C6H12O6 - Glucose": 180.16,
+  "H2CO - Formaldehyde": 30.03,
+  "CH3CHO - Acetaldehyde": 44.05,
+  "C6H5CHO - Benzaldehyde": 106.12,
+  "C3H8O3 - Glycerol": 92.09,
+  "C2H2O4 - Oxalic acid": 90.04,
+  "C9H12 - Propyl benzene": 120.19,
 
   // Gases (industrial)
-  CO: 28.01, // Carbon monoxide
-  NO: 30.01, // Nitric oxide
-  NO2: 46.01, // Nitrogen dioxide
-  N2O: 44.01, // Nitrous oxide
-  NH4Cl: 53.49, // Ammonium chloride
+  "CO - Carbon monoxide": 28.01,
+  "NO - Nitric oxide": 30.01,
+  "NO2 - Nitrogen dioxide": 46.01,
+  "N2O - Nitrous oxide": 44.01,
+  "N2O5 - Nitrogen pentoxide": 108.02,
+  "N2O4 - Nitrogen tetraoxide": 92.0,
+  "NH4Cl - Ammonium chloride": 53.49,
 
-  // Others (useful in labs & industry)
-  Fe2O3: 159.69, // Iron (III) oxide
-  Fe3O4: 231.54, // Magnetite
-  Al2O3: 101.96, // Aluminum oxide
-  SiO2: 60.08, // Silicon dioxide
-  CuSO4: 159.61, // Copper sulfate (anhydrous)
-  CuSO4_5H2O: 249.68, // Copper sulfate pentahydrate
+  // Others
+  "Fe2O3 - Iron (III) oxide (Ferric oxide)": 159.69,
+  "FeO - Ferrous oxide": 71.85,
+  "FeS - Ferrous sulfide": 87.92,
+  "Fe3O4 - Magnetite": 231.54,
+  "Al2O3 - Aluminum oxide": 101.96,
+  "SiO2 - Silicon dioxide": 60.08,
+  "CuSO4 - Copper sulfate (anhydrous)": 159.61,
+  "CuSO4.5H2O - Copper sulfate pentahydrate": 249.68,
+  "CaSO4.2H2O - Calcium sulfate (gypsum)": 172.18,
+  "Cu - Copper": 63.54,
+  "CuSO4 - Cupric sulfate": 159.61,
 };
 
 export default molarMassDatabase;

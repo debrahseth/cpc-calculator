@@ -3,11 +3,11 @@ import molarMassDatabase from "../data/molarMasses";
 import { FaCalculator, FaUndo } from "react-icons/fa";
 
 export default function StoichiometryDropdown() {
-  const [numReactants, setNumReactants] = useState(2);
-  const [numProducts, setNumProducts] = useState(2);
+  const [numReactants, setNumReactants] = useState(1);
+  const [numProducts, setNumProducts] = useState(1);
   const [conversionInput, setConversionInput] = useState("");
   const [reactants, setReactants] = useState(
-    Array.from({ length: 2 }, () => ({
+    Array.from({ length: 1 }, () => ({
       compound: "",
       coefficient: 1,
       value: "",
@@ -15,7 +15,7 @@ export default function StoichiometryDropdown() {
     }))
   );
   const [products, setProducts] = useState(
-    Array.from({ length: 2 }, () => ({
+    Array.from({ length: 1 }, () => ({
       compound: "",
       coefficient: 1,
       molarMass: "",
@@ -200,10 +200,10 @@ export default function StoichiometryDropdown() {
   };
 
   const handleReset = () => {
-    setNumReactants(2);
-    setNumProducts(2);
+    setNumReactants(1);
+    setNumProducts(1);
     setReactants(
-      Array.from({ length: 2 }, () => ({
+      Array.from({ length: 1 }, () => ({
         compound: "",
         coefficient: 1,
         value: "",
@@ -211,7 +211,7 @@ export default function StoichiometryDropdown() {
       }))
     );
     setProducts(
-      Array.from({ length: 2 }, () => ({
+      Array.from({ length: 1 }, () => ({
         compound: "",
         coefficient: 1,
         molarMass: "",
@@ -600,7 +600,7 @@ export default function StoichiometryDropdown() {
             )}
 
             {summary.length > 0 && (
-              <div className="mt-6 w-full overflow-x-auto">
+              <div className="mt-6 w-full md:w-[1550px] overflow-x-auto">
                 <h3 className="font-extrabold text-indigo-800 text-2xl mb-4 tracking-wide">
                   📊 Summary Table
                 </h3>

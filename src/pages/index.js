@@ -54,6 +54,19 @@ export default function Home() {
           <p>Dive deeper into advanced calculations and problem-solving.</p>
         </div>
 
+        <Link href="/properties" className={styles.card}>
+          <img
+            src="../.././periodic-table.png"
+            alt="Properties table"
+            className={styles.cardImage}
+          />
+          <h2>Properties Table</h2>
+          <p>
+            Key compound data: molar mass, melting points, heat capacity, and
+            more.
+          </p>
+        </Link>
+
         {showMessage && (
           <div className="fixed top-4 right-4 bg-yellow-100 text-yellow-800 border border-yellow-300 px-4 py-2 rounded shadow-lg">
             CPC Two is still under construction! 🚧
