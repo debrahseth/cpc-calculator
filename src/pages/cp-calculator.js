@@ -28,7 +28,9 @@ export default function CpCalculatorPage() {
           return;
         }
         const Cp_est = getCpKopp(compound, state || "solid");
-        setResult(`Estimated Cp ≈ ${Cp_est.toFixed(3)} J/mol·K (Kopp's Rule)`);
+        setResult(
+          `Estimated Cp ≈ ${Cp_est.toFixed(2)} J/g-atom·°C (Kopp's Rule)`
+        );
         return;
       }
 

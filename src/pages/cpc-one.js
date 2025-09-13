@@ -47,16 +47,16 @@ export default function CPCOne() {
             {/* <option value="balance">🔄 Material Balance (No Reaction)</option> */}
           </select>
 
-          <div className="flex flex-row md:flex-row gap-4 mt-4">
+          <div className="grid grid-flow-col auto-cols-auto gap-4">
             <button
               onClick={() => router.push("/")}
-              className="mt-4 md:w-2xl px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+              className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
             >
               🏠 Go to Home
             </button>
             <button
               onClick={() => router.push("/cp-calculator")}
-              className="mt-4 md:w-2xl px-6 py-3 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+              className="mt-4 px-6 py-3 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors"
             >
               🔢 Cp Calculator
             </button>

@@ -64,7 +64,8 @@ const boilingPoints = {
   "P4 - Phosphorus (red)": "Ignites in air, 725°C",
   "P4 - Phosphorus (white)": 280,
   "P2O5 - Phosphorus pentoxide": "Sublimes at 250°C",
-  "S8 - Sulfur (rhombic/monoclinic)": 444.6,
+  "S8 - Sulfur (rhombic)": 444.6,
+  "S8 - Sulfur (monoclinic)": 444.6,
   "Zn - Zinc": 907,
 
   // Hydrocarbons

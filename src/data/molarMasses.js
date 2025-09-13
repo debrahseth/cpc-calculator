@@ -64,7 +64,8 @@ const molarMassDatabase = {
   "P4 - Phosphorus (red)": 123.9,
   "P4 - Phosphorus (white)": 123.9,
   "P2O5 - Phosphorus pentoxide": 141.95,
-  "S8 - Sulfur (rhombic/monoclinic)": 256.53,
+  "S8 - Sulfur (rhombic)": 256.53,
+  "S8 - Sulfur (monoclinic)": 256.53,
   "Zn - Zinc": 65.38,
 
   // Hydrocarbons
@@ -82,6 +83,7 @@ const molarMassDatabase = {
   "C3H6 - Propylene": 42.08,
   "C4H10 - n-Butane": 58.12,
   "C5H12 - n-Pentane": 72.15,
+  "C5H12 - Isopentane": 72.15,
   "C5H10 - Pentene": 70.13,
   "C4H8 - Butene": 56.1,
   "C4H10 - Isobutane": 58.12,

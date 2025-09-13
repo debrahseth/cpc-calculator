@@ -87,7 +87,6 @@ const meltingPoints = {
   "C5H12 - Isopentane": -160.1,
   "C5H10 - Pentene": -165.2,
   "C4H8 - Butene": -185.3,
-  "C4H10 - Isobutane": 58.12,
   "C4H6 - 1,2-Butadiene": -136.5,
   "C4H6 - 1,3-Butadiene": -109.1,
   "C6H14 - Hexane": -95.32,

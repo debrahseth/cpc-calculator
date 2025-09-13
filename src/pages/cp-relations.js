@@ -45,6 +45,35 @@ export default function CpRelationsPage() {
     item.compound.toLowerCase().includes(search.toLowerCase())
   );
 
+  function formatScientificNice(num) {
+    if (num === 0) return "0";
+    const absNum = Math.abs(num);
+    if (absNum >= 1e5 || absNum < 1e-3) {
+      const exponent = Math.floor(Math.log10(absNum));
+      const coefficient = num / Math.pow(10, exponent);
+      const superscriptMap = {
+        0: "⁰",
+        1: "¹",
+        2: "²",
+        3: "³",
+        4: "⁴",
+        5: "⁵",
+        6: "⁶",
+        7: "⁷",
+        8: "⁸",
+        9: "⁹",
+        "-": "⁻",
+      };
+      const exponentSup = exponent
+        .toString()
+        .split("")
+        .map((d) => superscriptMap[d])
+        .join("");
+      return `${coefficient.toFixed(3)} × 10${exponentSup}`;
+    }
+    return num.toString();
+  }
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-indigo-100 via-blue-50 to-purple-100 p-2 sm:p-10 font-sans">
       <div className="w-full h-full">
@@ -71,7 +100,7 @@ export default function CpRelationsPage() {
           )}
         </p>
 
-        <div className="flex justify-center gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
           <button
             onClick={() => setViewMode("cp")}
             className={`px-6 py-3 rounded-xl font-semibold text-lg ${
@@ -143,10 +172,18 @@ export default function CpRelationsPage() {
                       {item.range[0]} – {item.range[1]}
                     </td>
                     <td className="px-6 py-4">{item.tempUnit}</td>
-                    <td className="px-6 py-4">{item.coefficients.a}</td>
-                    <td className="px-6 py-4">{item.coefficients.b}</td>
-                    <td className="px-6 py-4">{item.coefficients.c}</td>
-                    <td className="px-6 py-4">{item.coefficients.d}</td>
+                    <td className="px-6 py-4">
+                      {formatScientificNice(item.coefficients.a)}
+                    </td>
+                    <td className="px-6 py-4">
+                      {formatScientificNice(item.coefficients.b)}
+                    </td>
+                    <td className="px-6 py-4">
+                      {formatScientificNice(item.coefficients.c)}
+                    </td>
+                    <td className="px-6 py-4">
+                      {formatScientificNice(item.coefficients.d)}
+                    </td>
                   </tr>
                 ))}
               </tbody>

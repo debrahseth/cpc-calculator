@@ -3,16 +3,22 @@ import { useRouter } from "next/router";
 import molarMassDatabase from "../data/molarMasses";
 import meltingPoints from "../data/meltingPoints";
 import boilingPoints from "../data/boilingPoints";
+import criticalPressure from "../data/criticalPressure";
+import criticalTemperature from "../data/criticalTemperature";
 
 export default function PropertiesPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const compounds = Object.keys(molarMassDatabase).map((compound) => ({
-    compound,
-    molarMass: molarMassDatabase[compound],
-    meltingPoint: meltingPoints[compound] ?? "N/A",
-    boilingPoint: boilingPoints[compound] ?? "N/A",
-  }));
+  const compounds = Object.keys(molarMassDatabase)
+    .sort((a, b) => a.localeCompare(b))
+    .map((compound) => ({
+      compound,
+      molarMass: molarMassDatabase[compound],
+      meltingPoint: meltingPoints[compound] ?? "N/A",
+      boilingPoint: boilingPoints[compound] ?? "N/A",
+      criticalPressure: criticalPressure[compound] ?? "N/A",
+      criticalTemperature: criticalTemperature[compound] ?? "N/A",
+    }));
 
   const filteredCompounds = compounds.filter((item) =>
     item.compound.toLowerCase().includes(search.toLowerCase())
@@ -53,14 +59,26 @@ export default function PropertiesPage() {
           />
         </div>
 
-        <div className="overflow-x-auto bg-white shadow-2xl rounded-2xl border border-gray-200 max-h-[55vh]">
+        <div className="overflow-x-auto bg-white shadow-2xl rounded-2xl border border-gray-200 max-h-[80vh]">
           <table className="w-full border-collapse text-lg text-left text-gray-800">
             <thead className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white text-base tracking-wider sticky top-0 z-20 shadow-md">
               <tr>
-                <th className="px-8 py-5">Compound</th>
-                <th className="px-8 py-5">Molar Mass (g/mol)</th>
-                <th className="px-8 py-5">Melting Point (°C)</th>
-                <th className="px-8 py-5">Boiling Point (°C)</th>
+                <th className="px-10 py-5">Compound</th>
+                <th className="px-2 py-5">
+                  M<sub>w</sub> (g/mol)
+                </th>
+                <th className="px-8 py-5">
+                  T<sub>m</sub> (°C)
+                </th>
+                <th className="px-8 py-5">
+                  T<sub>b</sub> (°C)
+                </th>
+                <th className="px-8 py-5">
+                  T<sub>c</sub> (K)
+                </th>
+                <th className="px-2 py-5">
+                  P<sub>c</sub> (atm)
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -78,6 +96,8 @@ export default function PropertiesPage() {
                     <td className="px-8 py-5">{item.molarMass}</td>
                     <td className="px-8 py-5">{item.meltingPoint}</td>
                     <td className="px-8 py-5">{item.boilingPoint}</td>
+                    <td className="px-8 py-5">{item.criticalTemperature}</td>
+                    <td className="px-8 py-5">{item.criticalPressure}</td>
                   </tr>
                 ))
               ) : (
