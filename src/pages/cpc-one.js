@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import UnitConversion from "@/components/UnitConversion";
 import MoleFraction from "@/components/MoleFraction";
 import Stoichiometry from "@/components/Stoichiometry";
-// import MaterialBalance from "@/components/MaterialBalance";
+import MaterialBalance from "@/components/MaterialBalance";
 
 export default function CPCOne() {
   const [selectedCalc, setSelectedCalc] = useState("unit");
@@ -17,8 +17,8 @@ export default function CPCOne() {
         return <MoleFraction />;
       case "stoich":
         return <Stoichiometry />;
-      //   case "balance":
-      //     return <MaterialBalance />;
+      case "balance":
+        return <MaterialBalance />;
       default:
         return <UnitConversion />;
     }
@@ -44,10 +44,10 @@ export default function CPCOne() {
             <option value="unit">⚖️ Unit Conversion</option>
             <option value="mole">⚗️ Mole & Mass Fractions</option>
             <option value="stoich">📊 Stoichiometry</option>
-            {/* <option value="balance">🔄 Material Balance (No Reaction)</option> */}
+            <option value="balance">⚖️ Chemical Equation Balancer</option>
           </select>
 
-          <div className="grid grid-flow-col auto-cols-auto gap-4">
+          <div className="grid grid-flow-col auto-cols-auto w-full gap-4">
             <button
               onClick={() => router.push("/")}
               className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"

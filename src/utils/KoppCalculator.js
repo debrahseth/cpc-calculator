@@ -24,7 +24,7 @@ export function getCpKopp(formula, state = "solid") {
   let Cp_est = 0;
 
   for (const [el, count] of Object.entries(elements)) {
-    const elData = atomicCp[el]?.[state] ?? atomicCp["others"][state];
+    const elData = atomicCp[el]?.[state] ?? atomicCp["All Others"][state];
     if (elData === undefined) {
       throw new Error(
         `No Cp data available for element ${el} or fallback in ${state} state.`

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import molarMassDatabase from "../data/molarMasses";
+import densities from "../data/densities";
 import meltingPoints from "../data/meltingPoints";
 import boilingPoints from "../data/boilingPoints";
 import criticalPressure from "../data/criticalPressure";
@@ -14,6 +15,7 @@ export default function PropertiesPage() {
     .map((compound) => ({
       compound,
       molarMass: molarMassDatabase[compound],
+      density: densities[compound],
       meltingPoint: meltingPoints[compound] ?? "N/A",
       boilingPoint: boilingPoints[compound] ?? "N/A",
       criticalPressure: criticalPressure[compound] ?? "N/A",
@@ -67,6 +69,7 @@ export default function PropertiesPage() {
                 <th className="px-2 py-5">
                   M<sub>w</sub> (g/mol)
                 </th>
+                <th className="px-2 py-5">ρ (g/mL)</th>
                 <th className="px-8 py-5">
                   T<sub>m</sub> (°C)
                 </th>
@@ -94,6 +97,7 @@ export default function PropertiesPage() {
                       {item.compound}
                     </td>
                     <td className="px-8 py-5">{item.molarMass}</td>
+                    <td className="px-8 py-5">{item.density}</td>
                     <td className="px-8 py-5">{item.meltingPoint}</td>
                     <td className="px-8 py-5">{item.boilingPoint}</td>
                     <td className="px-8 py-5">{item.criticalTemperature}</td>

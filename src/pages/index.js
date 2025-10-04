@@ -67,6 +67,10 @@ export default function Home() {
           </p>
         </Link>
 
+        <p className={styles.typewriter}>
+          © {new Date().getFullYear()} UniCram. All rights reserved.
+        </p>
+
         {showMessage && (
           <div className="fixed top-4 right-4 bg-yellow-100 text-yellow-800 border border-yellow-300 px-4 py-2 rounded shadow-lg">
             CPC Two is still under construction! 🚧
